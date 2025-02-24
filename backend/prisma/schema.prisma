@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,82 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+// User
+model User {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  name      String
+  username  String    @unique
+  password  String
+  role      EmployeeRole @default(EMPLOYEE)
+  sessions  Session[]
+  timeLogs  TimeLog[]
+  reports   Report[]
+  imports   Import[]
+}
+
+enum EmployeeRole {
+  EMPLOYEE
+  MANAGER
+  LEADER
+  IT_ADMIN
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int
+  token     String   @unique
+  expires   DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Report - Relatorio
+model Report {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int  // Referente a quem iniciou o relatório
+  title     String
+  body      String
+  status    ReportStatus @default(PENDING)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
+  CLOSED
+}
+
+// Import
+model Import {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int  // Referente a quem importou
+  file      String
+  status    ImportStatus @default(PENDING)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timeLogs  TimeLog[]
+}
+
+enum ImportStatus {
+  PENDING
+  IMPORTED
+  FAILED
+}
+
+model TimeLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  clockIn    DateTime  // Hora de entrada
+  clockOut   DateTime? // Hora de saída
+  importId   Int?      // Importação associada, opcional
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  import     Import?   @relation(fields: [importId], references: [id], onDelete: Cascade)
 }
