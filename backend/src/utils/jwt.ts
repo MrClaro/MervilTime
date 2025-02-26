@@ -4,39 +4,45 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Definição de uma interface para o payload do token
 interface TokenPayload {
-  usuario: string;
+  id: string;
+  username: string;
+  role: string;
+  exp: number;
 }
 
-// Chave secreta para assinar e verificar tokens (deve vir do .env por segurança)
-const accessTokenSecret: string =
-  process.env.ACCESS_TOKEN_SECRET || "sua_chave_secreta";
+// Valida se a Secret key foi definida no .env
+if (!process.env.ACCESS_TOKEN_SECRET) {
+  console.error("Erro: ACCESS_TOKEN_SECRET não definido no ambiente.");
+  process.exit(1);
+}
+
+// Secret Key para assinar e verificar tokens
+const accessTokenSecret: string = process.env.ACCESS_TOKEN_SECRET;
 
 export default {
   /**
    * Assina e gera um token JWT contendo as informações do usuário.
    * @param payload - Dados do usuário a serem incluídos no token
+   * @param options - Opções adicionais para a geração do token (ex.: expiresIn)
    * @returns Uma Promise que resolve para o token JWT assinado
    */
-  signAccessToken(payload: TokenPayload): Promise<string> {
+  signAccessToken(
+    payload: { username: string; role: string },
+    options?: jwt.SignOptions,
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
-      // Criamos um objeto que contém as informações do token, incluindo a expiração
-      const obj_jwt = {
-        exp: Math.floor(Date.now() / 1000) + 60 * 60, // Expira em 1 hora
-        usuario: payload.usuario,
-      };
-
-      // Assina o token JWT
       jwt.sign(
-        obj_jwt,
+        payload,
         accessTokenSecret,
-        {},
+        options || {},
         (err: Error | null, token?: string) => {
           if (err) {
-            return reject(createError.InternalServerError()); // Retorna erro interno do servidor caso falhe
+            return reject(
+              createError.InternalServerError("Erro ao gerar token"),
+            );
           }
-          resolve(token as string); // Garante que o token é uma string
+          resolve(token as string);
         },
       );
     });
@@ -58,7 +64,7 @@ export default {
               err.name === "JsonWebTokenError" ? "Unauthorized" : err.message;
             return reject(createError.Unauthorized(message));
           }
-          resolve(payload as TokenPayload); // Converte para o tipo esperado
+          resolve(payload as TokenPayload);
         },
       );
     });
