@@ -12,7 +12,7 @@ import cookieParser from "cookie-parser";
 import compression from "compression";
 import cors from "cors";
 import dotenv from "dotenv";
-dotenv.config(); // Carrega variáveis de ambiente do arquivo .env
+dotenv.config();
 
 // Criação da instância do Express
 const app = express();
@@ -51,12 +51,14 @@ app.use(compression()); // Middleware para compressão de respostas HTTP
 // --------
 
 // Importação do middleware de autenticação
-import auth from "./middlewares/auth";
+import auth from "./middlewares/authToken";
+// Importação da rota de autenticação
+import gerarToken from "./routes/tokens/gerar-token";
 
 // Cadastro de Usuario
 import cadastroUsuario from "./routes/usuarios/cadastro";
-// Importação da rota de autenticação
-import authRoutes from "./routes/tokens/authToken";
+// Atualização de Usuário
+import atualizaUsuario from "./routes/usuarios/atualizacao";
 
 // --------
 // END ARQUIVOS
@@ -72,11 +74,14 @@ const server = http.createServer(app); // Cria o servidor HTTP a partir da inst�
 // ROTAS
 // --------
 
-// Registrar a rota de autenticação
-app.use("/auth", authRoutes);
+// Obtenção de Token
+app.use("/auth/gerar-token", gerarToken);
 
 // Cadastro do Usuário
-router.use("/usuario/cadastro", auth, cadastroUsuario);
+app.use("/usuario/cadastrar", auth, cadastroUsuario);
+
+// Atualização do Usuário
+app.use("/usuario/atualizar", auth, atualizaUsuario);
 
 // --------
 // VERSÃO API
