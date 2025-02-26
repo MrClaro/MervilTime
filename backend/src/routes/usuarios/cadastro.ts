@@ -1,47 +1,39 @@
 import express, { Request, Response, NextFunction, Router } from "express";
-import cadastraUsuariosController from "../../controllers/usuarios/cadastraUsuariosController";
+import CadastraUsuarioController from "../../controllers/usuarios/CadastraUsuarioController";
+import { authorize } from "../../middlewares/authRoles";
 
-// Estendendo Request para adicionar o campo 'dados'
+interface TokenPayload {
+  id: string;
+  username: string;
+  exp: number;
+  role: string;
+}
+
 interface AuthRequest extends Request {
-  dados?: { root: boolean }; // ou o tipo adequado para 'dados' baseado no seu código
+  dados?: TokenPayload | { root: boolean };
 }
 
 const router = Router();
 
-// Middleware para parsear corpo da requisição
 router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
 
-// Rota de proceessamento de importação de usuários
 router.post(
   "/",
+  authorize("CADASTRO_USUARIO"),
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
-      // Verificar se o token é válido
-      const { root } = req.dados || {}; // Protege contra o caso em que 'dados' não existam
-      if (!root) {
-        return res.status(401).json({
-          response: "Não autorizado!",
-        });
-      }
+      const { name, username, password } = req.body;
 
-      // Extrair dados do corpo da requisição
-      const { nome, path } = req.body;
-
-      // Verificar se os dados necessários estão presentes
-      if (!nome || !path) {
+      if (!name || !username || !password) {
         return res.status(400).json({
           response: "Formato da requisição inválida!",
         });
       }
 
-      // Processo de cadastro de usuários
-
-      // Processo de cadastro de usuários
-      await cadastraUsuariosController.registerUser(req, res, next);
+      await CadastraUsuarioController.registerUser(req, res, next);
       return;
     } catch (error) {
-      // Tratar erros gerais
       return next(error);
     }
   },
