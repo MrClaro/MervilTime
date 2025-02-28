@@ -8,6 +8,12 @@ export const Roles = {
 export const Permissions = {
   CADASTRO_USUARIO: [Roles.MANAGER, Roles.LEADER, Roles.IT_BOY],
   ATUALIZAR_USUARIO: [Roles.MANAGER, Roles.LEADER, Roles.IT_BOY],
+  VISUALIZAR_USUARIO: [
+    Roles.EMPLOYEE,
+    Roles.MANAGER,
+    Roles.LEADER,
+    Roles.IT_BOY,
+  ],
   // ... outras permissões ...
 };
 
