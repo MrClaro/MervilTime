@@ -1,20 +1,25 @@
 import { PrismaClient } from "@prisma/client";
-
+import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 class AtualizaUsuarioService {
-  // Método para atualizar informações do usuário
-  async updateUser(userId: number, data: { name?: string; username?: string }) {
-    // Atualiza as informações do usuário no banco de dados
+  async updateUser(
+    id: number,
+    data: { name?: string; username?: string; password?: string },
+  ) {
+    // Criptografa a senha se ela for fornecida
+    if (data.password) {
+      const salt = await bcrypt.genSalt(10);
+      data.password = await bcrypt.hash(data.password, salt);
+    }
+
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { id: id },
       data,
     });
 
     return updatedUser;
   }
-
-  // Outros métodos para login, deletar usuário, etc.
 }
 
 export const atualizaUsuarioService = new AtualizaUsuarioService();
