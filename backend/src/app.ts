@@ -56,9 +56,13 @@ import auth from "./middlewares/authToken";
 import gerarToken from "./routes/tokens/gerar-token";
 
 // Cadastro de Usuario
-import cadastroUsuario from "./routes/usuarios/cadastro";
+import cadastroUsuario from "./routes/usuarios/cadastrar";
 // Atualização de Usuário
-import atualizaUsuario from "./routes/usuarios/atualizacao";
+import atualizaUsuario from "./routes/usuarios/atualizar";
+// Visualização de Usuários
+import visualizaUsuario from "./routes/usuarios/visualizar";
+// Visualização de Usuários por ID
+import visualizaUsuarioById from "./routes/usuarios/visualizar";
 
 // --------
 // END ARQUIVOS
@@ -82,6 +86,12 @@ app.use("/usuario/cadastrar", auth, cadastroUsuario);
 
 // Atualização do Usuário
 app.use("/usuario/atualizar", auth, atualizaUsuario);
+
+// Visualização de usuários
+app.use("/usuario/visualizar", auth, visualizaUsuario);
+
+// Visualização de usuários por id
+app.use("/usuario/visualizar", auth, visualizaUsuarioById);
 
 // --------
 // VERSÃO API
