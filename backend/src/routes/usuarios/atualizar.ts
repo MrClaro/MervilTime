@@ -19,16 +19,17 @@ router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
 
 router.put(
-  "/",
+  "/:id",
   authorize("ATUALIZAR_USUARIO"),
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
-      const { name, username, password } = req.body;
+      const idString = req.params.id;
+      const id = parseInt(idString);
 
-      if (!name || !username || !password) {
-        return res.status(400).json({
-          response: "Formato da requisição inválida!",
-        });
+      if (isNaN(id)) {
+        // Tratar o caso em que o id não é um número válido.
+        res.status(400).json({ error: "ID inválido" });
+        return;
       }
 
       await AtualizaUsuarioController.updateUser(req, res, next);
